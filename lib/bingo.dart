@@ -1,189 +1,470 @@
+import 'dart:math';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class BingoPage extends StatelessWidget {
+class BingoPage extends StatefulWidget {
   const BingoPage({super.key});
 
   @override
+  State<BingoPage> createState() => _BingoPageState();
+}
+
+class _BingoPageState extends State<BingoPage> {
+  List<int> calls = [];
+  List<int> board = List.generate(75, (index) => index + 1);
+  bool isPaused = false;
+  bool isGameRunning = false;
+  final AudioPlayer _player = AudioPlayer();
+
+  bool isWinner(List<List<int>> card, List<int> calledNumbers) {
+    int size = 5;
+
+    for (int i = 0; i < size; i++) {
+      // ignore: avoid_types_as_parameter_names
+      if (card[i].every((num) => calledNumbers.contains(num))) {
+        return true;
+      }
+    }
+
+    // Check columns
+    for (int col = 0; col < size; col++) {
+      bool columnWin = true;
+      for (int row = 0; row < size; row++) {
+        if (!calledNumbers.contains(card[row][col])) {
+          columnWin = false;
+          break;
+        }
+      }
+      if (columnWin) return true;
+    }
+
+    // Check main diagonal
+    bool mainDiagonalWin = true;
+    for (int i = 0; i < size; i++) {
+      if (!calledNumbers.contains(card[i][i])) {
+        mainDiagonalWin = false;
+        break;
+      }
+    }
+    if (mainDiagonalWin) return true;
+
+    // Check secondary diagonal
+    bool secondaryDiagonalWin = true;
+    for (int i = 0; i < size; i++) {
+      if (!calledNumbers.contains(card[i][size - 1 - i])) {
+        secondaryDiagonalWin = false;
+        break;
+      }
+    }
+    if (secondaryDiagonalWin) return true;
+
+    return false;
+  }
+
+  Future<void> callNumber(int number) async {
+    String filePath = 'assets/audio/english/$number.mp3';
+    await _player.play(UrlSource(filePath));
+  }
+
+  Future<void> callFunc() async {
+    Random random = Random();
+
+    while (board.isNotEmpty && !isPaused) {
+      int randomIndex = random.nextInt(board.length);
+      int randomNumber = board[randomIndex];
+      board.removeAt(randomIndex);
+      await callNumber(randomNumber);
+      setState(() {
+        calls.add(randomNumber);
+      });
+      await Future.delayed(Duration(seconds: 2));
+
+      if (isPaused) {
+        break;
+      }
+    }
+  }
+
+  void togglePauseResume() {
+    setState(() {
+      if (isPaused) {
+        isPaused = false;
+        callFunc();
+      } else {
+        isPaused = true;
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(
-          height: 50,
-        ),
-        Container(
-          width: MediaQuery.of(context).size.width,
-          color: Colors.blue,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                Row(
-                  spacing: 15,
-                  children: [
-                    Row(
-                      spacing: 10,
-                      children: [
-                        Column(
-                          spacing: 5,
-                          children: [
-                            Container(
-                              height: 70,
-                              width: 70,
-                              color: Colors.black,
-                              child: Text(
-                                "",
-                                style: TextStyle(fontSize: 20),
-                              ),
-                            ),
-                            Text(
-                              "Total Calls",
-                              style: TextStyle(fontSize: 20),
-                            )
-                          ],
-                        ),
-                        Column(
-                          spacing: 5,
-                          children: [
-                            Container(
-                              height: 70,
-                              width: 70,
-                              color: Colors.black,
-                              child: Text(
-                                "",
-                                style: TextStyle(fontSize: 20),
-                              ),
-                            ),
-                            Text(
-                              "Previous Call",
-                              style: TextStyle(fontSize: 20),
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          color: Colors.white,
-                          child: Padding(
-                            padding: const EdgeInsets.all(15.0),
-                            child: Column(
-                              children: [
-                                Text("B"),
-                                Text("I"),
-                                Text("N"),
-                                Text("G"),
-                                Text("O"),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Column(children: [
-                          Row(
-                            children: [
-                              Text('1'),
-                              Text('2'),
-                              Text('3'),
-                              Text('4'),
-                              Text('5'),
-                              Text('6'),
-                              Text('7'),
-                              Text('8'),
-                              Text('9'),
-                              Text('10'),
-                              Text('11'),
-                              Text('12'),
-                              Text('13'),
-                              Text('14'),
-                              Text('15'),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('16'),
-                              Text('17'),
-                              Text('18'),
-                              Text('19'),
-                              Text('20'),
-                              Text('21'),
-                              Text('22'),
-                              Text('23'),
-                              Text('24'),
-                              Text('25'),
-                              Text('26'),
-                              Text('27'),
-                              Text('28'),
-                              Text('29'),
-                              Text('30'),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('31'),
-                              Text('32'),
-                              Text('33'),
-                              Text('34'),
-                              Text('35'),
-                              Text('36'),
-                              Text('37'),
-                              Text('38'),
-                              Text('39'),
-                              Text('40'),
-                              Text('41'),
-                              Text('42'),
-                              Text('43'),
-                              Text('44'),
-                              Text('45'),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('46'),
-                              Text('47'),
-                              Text('48'),
-                              Text('49'),
-                              Text('50'),
-                              Text('51'),
-                              Text('52'),
-                              Text('53'),
-                              Text('54'),
-                              Text('55'),
-                              Text('56'),
-                              Text('57'),
-                              Text('58'),
-                              Text('59'),
-                              Text('60'),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('61'),
-                              Text('62'),
-                              Text('63'),
-                              Text('64'),
-                              Text('65'),
-                              Text('66'),
-                              Text('67'),
-                              Text('68'),
-                              Text('69'),
-                              Text('70'),
-                              Text('71'),
-                              Text('72'),
-                              Text('73'),
-                              Text('74'),
-                              Text('75'),
-                            ],
-                          )
-                        ])
-                      ],
-                    )
-                  ],
-                )
-              ],
-            ),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              // CircleAvatar(
+              //   radius: 30,
+              // ),
+              // TextField(
+              //   decoration: InputDecoration(
+              //     hintText: 'Win Amount',
+              //     border: OutlineInputBorder(),
+              //     labelText: 'Enter card number',
+              //   ),
+              // ),
+            ],
           ),
-        )
-      ],
+          const SizedBox(
+            height: 50,
+          ),
+          BingoBoard(),
+
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 60,
+                // backgroundImage: AssetImage("assets/images/bingo.png"),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text("check", style: textStyle),
+                ),
+              )
+            ],
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (!isGameRunning) {
+                setState(() {
+                  isGameRunning = true;
+                });
+
+                callFunc();
+              }
+              if (board.isEmpty) {
+                setState(() {
+                  board = List.generate(15, (index) => index + 1);
+                });
+                callFunc();
+              }
+            },
+            child: Text("Start New Game"),
+          ),
+          ElevatedButton(
+            onPressed: togglePauseResume,
+            child: Text(isPaused ? "Start" : "Pause"),
+          ),
+
+          // ElevatedButton(
+          //         onPressed: () {
+          //           if (_controller.text.isEmpty ||
+          //               int.tryParse(_controller.text) == null) {
+          //             print("Please enter a valid card number");
+          //             return;
+          //           }
+          //           int cardIndex = int.parse(_controller.text) - 1;
+          //           if (cardIndex < 0 || cardIndex >= bingoCards.length) {
+          //             print("Invalid card number");
+          //             return;
+          //           }
+
+          //           bool iWinner = isWinner(bingoCards[cardIndex], calls);
+          //           print("Winner: $iWinner");
+          //         },
+          //         child: Text("Check Bingo"),
+          //       ),
+        ],
+      ),
     );
   }
 }
+
+class BingoBoard extends StatelessWidget {
+  const BingoBoard({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.teal.shade900,
+        border: Border.all(color: Colors.green, width: 3),
+      ),
+      width: MediaQuery.of(context).size.width,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        child: Column(
+          children: [
+            Row(
+              spacing: 10,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  spacing: 15,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      spacing: 20,
+                      children: [],
+                    ),
+                    Container(
+                      width: 150,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Image(
+                        fit: BoxFit.contain,
+                        image: AssetImage("assets/gif/bingo1.gif"),
+                      ),
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child:
+                                  Text("B", style: textStyleForContainerText),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("1", style: textStyle),
+                                Text("2", style: textStyle),
+                                Text("3", style: textStyle),
+                                Text("4", style: textStyle),
+                                Text("5", style: textStyle),
+                                Text("6", style: textStyle),
+                                Text("7", style: textStyle),
+                                Text("8", style: textStyle),
+                                Text("9", style: textStyle),
+                                Text("10", style: textStyle),
+                                Text("11", style: textStyle),
+                                Text("12", style: textStyle),
+                                Text("13", style: textStyle),
+                                Text("14", style: textStyle),
+                                Text("15", style: textStyle),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child:
+                                  Text("B", style: textStyleForContainerText),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("1", style: textStyle),
+                                Text("2", style: textStyle),
+                                Text("3", style: textStyle),
+                                Text("4", style: textStyle),
+                                Text("5", style: textStyle),
+                                Text("6", style: textStyle),
+                                Text("7", style: textStyle),
+                                Text("8", style: textStyle),
+                                Text("9", style: textStyle),
+                                Text("10", style: textStyle),
+                                Text("11", style: textStyle),
+                                Text("12", style: textStyle),
+                                Text("13", style: textStyle),
+                                Text("14", style: textStyle),
+                                Text("15", style: textStyle),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child:
+                                  Text("B", style: textStyleForContainerText),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("1", style: textStyle),
+                                Text("2", style: textStyle),
+                                Text("3", style: textStyle),
+                                Text("4", style: textStyle),
+                                Text("5", style: textStyle),
+                                Text("6", style: textStyle),
+                                Text("7", style: textStyle),
+                                Text("8", style: textStyle),
+                                Text("9", style: textStyle),
+                                Text("10", style: textStyle),
+                                Text("11", style: textStyle),
+                                Text("12", style: textStyle),
+                                Text("13", style: textStyle),
+                                Text("14", style: textStyle),
+                                Text("15", style: textStyle),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child:
+                                  Text("B", style: textStyleForContainerText),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("1", style: textStyle),
+                                Text("2", style: textStyle),
+                                Text("3", style: textStyle),
+                                Text("4", style: textStyle),
+                                Text("5", style: textStyle),
+                                Text("6", style: textStyle),
+                                Text("7", style: textStyle),
+                                Text("8", style: textStyle),
+                                Text("9", style: textStyle),
+                                Text("10", style: textStyle),
+                                Text("11", style: textStyle),
+                                Text("12", style: textStyle),
+                                Text("13", style: textStyle),
+                                Text("14", style: textStyle),
+                                Text("15", style: textStyle),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child:
+                                  Text("B", style: textStyleForContainerText),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("1", style: textStyle),
+                                Text("2", style: textStyle),
+                                Text("3", style: textStyle),
+                                Text("4", style: textStyle),
+                                Text("5", style: textStyle),
+                                Text("6", style: textStyle),
+                                Text("7", style: textStyle),
+                                Text("8", style: textStyle),
+                                Text("9", style: textStyle),
+                                Text("10", style: textStyle),
+                                Text("11", style: textStyle),
+                                Text("12", style: textStyle),
+                                Text("13", style: textStyle),
+                                Text("14", style: textStyle),
+                                Text("15", style: textStyle),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+TextStyle? textStyle = GoogleFonts.monoton(
+  fontSize: 26,
+  decoration: TextDecoration.none,
+  color: Colors.white,
+  fontStyle: FontStyle.italic,
+);
+
+TextStyle? textStyleForContainerText = GoogleFonts.lato(
+  fontSize: 35,
+  decoration: TextDecoration.none,
+  color: Colors.red,
+  fontStyle: FontStyle.normal,
+);
